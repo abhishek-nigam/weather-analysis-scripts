@@ -1,3 +1,7 @@
+# Takes two positional arguments
+# 1st - image location - mandatory
+# 2nd - workbook name - optional
+
 import sys
 from datetime import date
 

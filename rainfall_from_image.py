@@ -2,6 +2,9 @@
 # 1st - image location - mandatory
 # 2nd - workbook name - optional
 
+# TODO: Specify output folder of workbook
+
+
 import sys
 from datetime import date
 
@@ -25,8 +28,13 @@ image = cv2.cvtColor(numpy.array(pil_image), cv2.COLOR_RGB2BGR)
 # NOTE: If using conventional map (x,y) coordinates,
 # NOTE: write them as (y,x) here
 places = {
-    "Place 1": (432, 166),
-    "Place 2": (511, 188),
+    "Palam": (362, 328),
+    "Lodhi Road": (361, 358),
+    "Faridabad": (408, 382),
+    "Ridge": (404, 349),
+    "Ayanagar": (393, 317),
+    "Mungeshpur": (300, 305),
+    "Najafgarh": (357, 298)
 }
 
 
@@ -58,7 +66,7 @@ for place, pos in places.items():
     # Open CV stores color values in BGR format
     b, g, r = image[pos[0], pos[1]]
     # Rearranging color values, and obtaining rainfall
-    rainfall = rgb_to_rainfall[(r, g, b)]
+    rainfall = rgb_to_rainfall.get((r, g, b), "No rainfall")
     result.append((place, rainfall))
 
 

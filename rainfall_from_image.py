@@ -9,10 +9,8 @@ import sys
 from datetime import date
 from functools import reduce
 
-import numpy
 import xlsxwriter
 from PIL import Image
-from cv2 import cv2
 
 
 if len(sys.argv) < 2:
@@ -21,49 +19,47 @@ if len(sys.argv) < 2:
 
 
 # Read gif image using PIL/Pillow, and then convert into OpenCV format
-pil_image = Image.open(sys.argv[1])
-image = cv2.cvtColor(numpy.array(pil_image), cv2.COLOR_RGB2BGR)
+image = Image.open(sys.argv[1], "r").convert("RGB")
+image_pixels_rgb = list(image.getdata())
+IMAGE_WIDTH = 800
 
-
-# Stores location in (row, column) format
-# NOTE: If using conventional map (x,y) coordinates,
-# NOTE: write them as (y,x) here
+# Stores location in (column, row) or (x, y) format
 places = {
-    "Palam": (363, 326),
-    "Lodhi Road": (361, 358),
-    "Faridabad": (408, 382),
-    "Ridge": (332, 365),
-    "Ayanagar": (391, 340),
-    "Najafgarh": (354, 305),
-    "Ghaziabad": (339, 414),
-    "Noida": (376, 397),
-    "Gr. Noida": (383, 419),
-    "Meerut": (254, 473),
-    "Baghpat": (267, 359),
-    "Bulandshahar": (408, 507),
-    "Muzaffarnagar": (124, 473),
-    "Gurugram": (395, 314),
-    "Panipat": (146, 301)
+    "Palam": (326, 363),
+    "Lodhi Road": (358, 361),
+    "Faridabad": (382, 408),
+    "Ridge": (365, 332),
+    "Ayanagar": (340, 391),
+    "Najafgarh": (305, 354),
+    "Ghaziabad": (414, 339),
+    "Noida": (397, 376),
+    "Gr. Noida": (419, 383),
+    "Meerut": (473, 254),
+    "Baghpat": (359, 267),
+    "Bulandshahar": (507, 408),
+    "Muzaffarnagar": (473, 124),
+    "Gurugram": (314, 395),
+    "Panipat": (301, 146)
 }
 
 
 # Maps color values in RGB format to rainfall range
 rgb_to_rainfall = {
-    (38, 38, 38): (93, 100),
-    (41, 41, 41): (87,93),
-    (42, 42, 42): (80,87),
-    (43, 43, 43): (74,80),
-    (44, 44, 44): (67,74),
-    (40, 40, 40): (60,67),
-    (45, 45, 45): (54,60),
-    (23, 23, 23): (47,54),
-    (16, 16, 16): (41,47),
-    (5, 5, 5): (34,41),
-    (4, 4, 4): (27,34),
-    (3, 3, 3): (21,27),
-    (2, 2, 2): (14,21),
-    (1, 1, 1): (7.6,14),
-    (6, 6, 6): (1.0,7.6)
+    (200, 0, 0): (93, 100),
+    (255, 63, 0): (87, 93),
+    (255, 115, 0): (80, 87),
+    (255, 189, 0): (74, 80),
+    (255, 230, 0): (67, 74),
+    (252, 252, 112): (60, 67),
+    (255, 255, 255): (54, 60),
+    (135, 241, 255): (47, 54),
+    (83, 209, 255): (41, 47),
+    (26, 163, 255): (34, 41),
+    (0, 121, 255): (27, 34),
+    (0, 71, 255): (21, 27),
+    (0, 58, 200): (14, 21),
+    (0, 25, 176): (7.6, 14),
+    (58, 0, 160): (1.0, 7.6)
 }
 
 
@@ -80,15 +76,12 @@ for place, pos in places.items():
     for i in range(-dist, dist + 1, dist):
         for j in range(-dist, dist + 1, dist):
             points.append((pos[0] + i, pos[1] + j))
-    
+
     # list of RGB values at observation points
     rgb_values = []
     for point in points:
-        # OpenCV stores color values in BGR format
-        b, g, r = image[point[0], point[1]]
-        rgb_values.append((r ,g, b))
-    
-    # print(rgb_values)
+        index = (point[1] - 1) * IMAGE_WIDTH + point[0]
+        rgb_values.append(image_pixels_rgb[index])
 
     # list of non-zero rain values (middle value of range)
     valid_rain_values = []
@@ -98,14 +91,13 @@ for place, pos in places.items():
         if rain_middle != 0:
             valid_rain_values.append(rain_middle)
 
-    # print(len(valid_rain_values))
-    
     if len(valid_rain_values) == 0:
         result.append((place, "No rainfall"))
     else:
         rain_sum = reduce(lambda val1, val2: val1 + val2, valid_rain_values)
-        rain_avg =  rain_sum / len(valid_rain_values)
-        result.append((place, f'{"{0:.2f}".format(rain_avg - 2)} to {"{0:.2f}".format(rain_avg + 2)} mm rainfall'))
+        rain_avg = rain_sum / len(valid_rain_values)
+        result.append(
+            (place, f'{"{0:.2f}".format(rain_avg - 2)} to {"{0:.2f}".format(rain_avg + 2)} mm rainfall'))
 
 
 # Write result in Workbook

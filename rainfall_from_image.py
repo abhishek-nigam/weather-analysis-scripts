@@ -21,7 +21,7 @@ if len(sys.argv) < 2:
 # Read gif image using PIL/Pillow, and then convert into OpenCV format
 image = Image.open(sys.argv[1], "r").convert("RGB")
 image_pixels_rgb = list(image.getdata())
-IMAGE_WIDTH = 800
+IMAGE_WIDTH = 880
 
 # Stores location in (column, row) or (x, y) format
 places = {

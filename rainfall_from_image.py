@@ -27,19 +27,37 @@ IMAGE_WIDTH = 880
 places = {
     "Palam": (326, 363),
     "Lodhi Road": (358, 361),
-    "Faridabad": (382, 408),
     "Ridge": (365, 332),
     "Ayanagar": (340, 391),
     "Najafgarh": (305, 354),
+    "Faridabad": (382, 408),
     "Ghaziabad": (414, 339),
     "Noida": (397, 376),
     "Gr. Noida": (419, 383),
+    "Gurugram": (314, 395),
+    #
+    "Muzaffarnagar": (473, 124),
+    "Bijnor": (573, 150),
     "Meerut": (473, 254),
     "Baghpat": (359, 267),
     "Bulandshahar": (507, 408),
-    "Muzaffarnagar": (473, 124),
-    "Gurugram": (314, 395),
-    "Panipat": (301, 146)
+    "Sambhal": (675, 360),
+    "Aligarh": (560, 545),
+    "Hathras": (556, 623),
+    "Mathura": (467, 653),
+    #
+    "Panipat": (301, 146),
+    "Karnal": (306, 67),
+    "Kaithal": (169, 38),
+    "Jind": (149, 165),
+    "Hissar": (10, 209),
+    "Rohtak": (213, 279),
+    "Bhiwani": (106, 303),
+    "Jhajjar": (227, 357),
+    "Rewari": (216, 467),
+    "Narnaul": (96, 499),
+    "Nuh": (309, 490),
+    "Palwal": (385, 480)
 }
 
 
@@ -96,8 +114,20 @@ for place, pos in places.items():
     else:
         rain_sum = reduce(lambda val1, val2: val1 + val2, valid_rain_values)
         rain_avg = rain_sum / len(valid_rain_values)
+
+        # Find rainfall range in which rain_avg lies
+        rainfall_ranges = list(rgb_to_rainfall.values())
+        rainfall_ranges.reverse()
+        low, high = -1, -1
+
+        for rainfall_range in rainfall_ranges:
+            if rain_avg < rainfall_range[1]:
+                low = rainfall_range[0]
+                high = rainfall_range[1]
+                break
+
         result.append(
-            (place, f'{"{0:.2f}".format(rain_avg - 2)} to {"{0:.2f}".format(rain_avg + 2)} mm rainfall'))
+            (place, f'{low} to {high} mm rainfall'))
 
 
 # Write result in Workbook
